@@ -1,0 +1,29 @@
+# 日々のタスクを定義するファイル。
+#
+# recurrence:
+#   daily              毎日
+#   weekly + days      指定した曜日のみ (mon, tue, wed, thu, fri, sat, sun)
+#   date               特定の日付のみ (YYYY-MM-DD)。単発タスク用。
+#
+# 上記のいずれか一つを各タスクに指定してください。
+# priority (任意): high / normal / low。省略時は normal。
+
+tasks:
+  - title: "資産・家計簿の記帳"
+    recurrence: daily
+    priority: normal
+
+  - title: "メールとタスクの棚卸し"
+    recurrence: weekly
+    days: [mon, wed, fri]
+    priority: normal
+
+  - title: "週次ふりかえり・来週の計画"
+    recurrence: weekly
+    days: [sun]
+    priority: high
+
+  # 単発タスクの例。日付を過ぎたら自動的に送られなくなります。
+  # - title: "確定申告の書類提出"
+  #   date: "2026-09-15"
+  #   priority: high
