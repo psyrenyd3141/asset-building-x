@@ -12,22 +12,56 @@
 
 ## セットアップ
 
-### 1. LINE Messaging APIチャネルを作成
+### 1. LINE Developersアカウント登録
 
-1. [LINE Developersコンソール](https://developers.line.biz/console/) にログインし、プロバイダーを作成
-2. 「Messaging API」チャネルを新規作成
-3. チャネル基本設定の「チャネルアクセストークン(長期)」を発行 → `LINE_CHANNEL_ACCESS_TOKEN`
-4. 自分のLINEユーザーIDを取得(以下のいずれか)
-   - LINE Official Account Managerの「友だち情報」から確認
-   - もしくは一時的にWebhookを有効にし、自分から作成したBotへメッセージを送って `source.userId` をログから確認
-   - → `LINE_USER_ID`
-5. 作成したBotを自分のLINEアカウントで友だち追加しておく(これをしないとpush配信できません)
+1. [LINE Developersコンソール](https://developers.line.biz/console/) にアクセスし、普段使っているLINEアカウントでログイン
+2. 初回は開発者情報(名前・メールアドレス)の登録を求められるので入力
 
-### 2. (任意) Claude APIキーを取得
+### 2. プロバイダーとMessaging APIチャネルを作成
+
+1. 「作成」→「新規プロバイダー作成」でプロバイダー名を適当に入力(例: `個人開発`)して作成
+2. 作成したプロバイダーのページで「チャネル作成」→ チャネルタイプは **「Messaging API」** を選択
+3. チャネル名(例「AI秘書」)、チャネル説明、業種などの必須項目を入力し、利用規約に同意して作成
+
+### 3. チャネルアクセストークンを発行
+
+1. 作成したチャネルの管理画面 →「Messaging API設定」タブを開く
+2. 下の方にある「チャネルアクセストークン(長期)」欄で「発行」をクリック
+3. 発行されたトークンをコピー → `LINE_CHANNEL_ACCESS_TOKEN`
+
+### 4. Botを友だち追加
+
+「Messaging API設定」タブに表示されるQRコードを自分のLINEアプリでスキャンして友だち追加してください。これをしないとpush配信(プログラムからの送信)が届きません。
+
+### 5. 自分のLINEユーザーIDを取得
+
+LINE Developersコンソール上には自分のuserIdを直接表示する場所がないため、このリポジトリに用意した簡易Webhook受信スクリプトを使って取得します。
+
+1. [ngrok](https://ngrok.com/)(無料アカウントでOK)をインストールし、`ngrok config add-authtoken <あなたのトークン>` で認証設定を済ませる
+2. ターミナルでこのリポジトリを開き、Webhook受信サーバーを起動:
+   ```bash
+   npm run get-user-id
+   ```
+   (`http://localhost:3000/webhook` で待受け開始)
+3. 別のターミナルでngrokを起動し、3000番ポートを公開:
+   ```bash
+   ngrok http 3000
+   ```
+   表示される `https://xxxx.ngrok-free.app` のようなURLをコピー
+4. LINE Developersコンソール →「Messaging API設定」タブで:
+   - Webhook URLに `https://xxxx.ngrok-free.app/webhook` を設定して保存
+   - 「Webhookの利用」をオンにする
+   - 「検証」ボタンを押して200 OKが返ることを確認
+   - 「応答メッセージ」はオフにしておくと、Botからの自動返信を止められて確認しやすいです(チャネル基本設定の「LINE公式アカウント機能」→ LINE Official Account Managerの応答設定から変更可能)
+5. 友だち追加したBotへLINEアプリから何かメッセージを送信
+6. `npm run get-user-id` を実行しているターミナルに `あなたの userId: U....` と表示されるので、これをコピー → `LINE_USER_ID`
+7. 確認が終わったら、ngrokとサーバーは止めてOK。Webhook URLの設定もそのままで問題ありません(このBotで他にWebhookを使う予定がなければ)
+
+### 6. (任意) Claude APIキーを取得
 
 秘書らしい自然な文章で送りたい場合は [console.anthropic.com](https://console.anthropic.com/) でAPIキーを発行し `ANTHROPIC_API_KEY` に設定してください。未設定でも定型メッセージで動作します。
 
-### 3. GitHub Secretsを設定
+### 7. GitHub Secretsを設定
 
 このリポジトリの Settings → Secrets and variables → Actions で以下を登録します。
 
@@ -37,7 +71,7 @@
 | `LINE_USER_ID` | ✅ | 送信先のLINEユーザーID(グループID/ルームIDも可) |
 | `ANTHROPIC_API_KEY` | 任意 | AI文章生成を使う場合のみ |
 
-### 4. タスクを編集
+### 8. タスクを編集
 
 `tasks.yaml` を編集して自分のタスクを登録してください。
 
@@ -60,7 +94,7 @@ tasks:
 - `date: "YYYY-MM-DD"` — 単発タスク。その日だけ送信され、過ぎたら自動的に送られなくなります
 - `priority: high` — 任意。メッセージ内で強調されます(省略時 `normal`)
 
-### 5. 動作確認
+### 9. 動作確認
 
 GitHub Actionsの「Daily LINE Secretary」ワークフローは `workflow_dispatch` にも対応しているので、Actionsタブから手動実行して動作確認できます。
 

@@ -9,7 +9,8 @@
   },
   "scripts": {
     "send": "node src/sendDailyTasks.js",
-    "send:dry-run": "DRY_RUN=1 node src/sendDailyTasks.js"
+    "send:dry-run": "DRY_RUN=1 node src/sendDailyTasks.js",
+    "get-user-id": "node src/getUserId.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.0"
