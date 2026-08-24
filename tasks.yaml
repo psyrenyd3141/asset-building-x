@@ -23,6 +23,10 @@ tasks:
     days: [sun]
     priority: high
 
+  - title: "Xで最低10件リプ回りする"
+    date: "2026-08-25"
+    priority: normal
+
   # 単発タスクの例。日付を過ぎたら自動的に送られなくなります。
   # - title: "確定申告の書類提出"
   #   date: "2026-09-15"
