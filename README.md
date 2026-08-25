@@ -5,7 +5,7 @@
 ## 仕組み
 
 1. `tasks.yaml` に日々のタスクを登録しておく(毎日/曜日指定/特定日付に対応)
-2. GitHub Actionsが毎朝07:00(JST)に `src/sendDailyTasks.js` を実行
+2. GitHub Actionsが毎朝06:00(JST)に `src/sendDailyTasks.js` を実行
 3. 今日該当するタスクを抽出
 4. `ANTHROPIC_API_KEY` を設定していれば、Claude APIで挨拶+タスク整理+一言のメッセージを生成。未設定なら定型フォーマットで送信
 5. LINE Messaging APIの `push` エンドポイントでLINEにメッセージを送信
@@ -107,7 +107,7 @@ posts:
 ```
 
 - `generated_date` が **その日の日付(JST)と一致する場合のみ** 送信対象になります。古い投稿案が延々と送られ続けるのを防ぐためです
-- 投稿案を書き込む処理は、**毎朝07:00 JSTより前**(例: 06:45)に完了・コミット・プッシュされている必要があります
+- 投稿案を書き込む処理は、**毎朝06:00 JSTより前**(例: 05:30)に完了・コミット・プッシュされている必要があります
 - 投稿案が無い日は `posts: []` のままでも、`generated_date` を空にしておいても問題ありません
 
 ### 9. 動作確認
@@ -126,4 +126,4 @@ npm run send           # 実際にLINEへ送信
 
 ## スケジュールの変更
 
-`.github/workflows/daily-secretary.yml` の `cron` を編集してください。デフォルトは `0 22 * * *`(UTC)= 毎朝07:00 JSTです。cronはUTC基準で評価されるため、JSTの時刻から9時間引いた値を指定してください。
+`.github/workflows/daily-secretary.yml` の `cron` を編集してください。デフォルトは `0 21 * * *`(UTC)= 毎朝06:00 JSTです。cronはUTC基準で評価されるため、JSTの時刻から9時間引いた値を指定してください。
