@@ -10,6 +10,12 @@
 4. `ANTHROPIC_API_KEY` を設定していれば、Claude APIで挨拶+タスク整理+一言のメッセージを生成。未設定なら定型フォーマットで送信
 5. LINE Messaging APIの `push` エンドポイントでLINEにメッセージを送信
 
+X投稿案(`post_drafts.yaml`)の中身の作り方・運用ノウハウは以下のドキュメントにまとめてあります。新しいセッションでこのリポジトリを開いた場合も、これらを読めば同じルールで作業を再開できます。
+
+- [`ACCOUNT_GUIDELINES.md`](./ACCOUNT_GUIDELINES.md) — Xアカウントの立ち位置・トーン・コンプライアンスの扱い方
+- [`DEMAND_EXTRACTION_METHOD.md`](./DEMAND_EXTRACTION_METHOD.md) — 他アカウントの投稿から「需要」だけを抽出してオリジナル投稿を作る手順
+- [`POST_DRAFT_GUIDELINES.md`](./POST_DRAFT_GUIDELINES.md) — 上記2つを踏まえた、投稿案キュー(`post_drafts_queue.yaml`)の補充ルールと曜日別テーマ配分
+
 ## セットアップ
 
 ### 1. LINE Developersアカウント登録
