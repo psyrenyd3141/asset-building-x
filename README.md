@@ -69,7 +69,7 @@ LINE Developersコンソール上には自分のuserIdを直接表示する場�
 | --- | --- | --- |
 | `LINE_CHANNEL_ACCESS_TOKEN` | ✅ | LINEチャネルアクセストークン(長期) |
 | `LINE_USER_ID` | ✅ | 送信先のLINEユーザーID(グループID/ルームIDも可) |
-| `ANTHROPIC_API_KEY` | 任意(secretaryのAI文章生成用) / ✅(投稿案自動生成を使う場合) | AI文章生成、および後述の投稿案自動生成で使用 |
+| `ANTHROPIC_API_KEY` | 任意 | AI文章生成を使う場合のみ(投稿案の自動生成には不要) |
 
 ### 8. タスクを編集
 
@@ -110,13 +110,13 @@ posts:
 - 投稿案を書き込む処理は、**毎朝06:00 JSTより前**(例: 05:30)に完了・コミット・プッシュされている必要があります
 - 投稿案が無い日は `posts: []` のままでも、`generated_date` を空にしておいても問題ありません
 
-このリポジトリには、この投稿案自体を毎朝自動生成する仕組み(`src/generatePostDrafts.js` + `.github/workflows/generate-post-drafts.yml`)も含まれています。
+このリポジトリには、この投稿案自体を毎朝書き出す仕組み(`src/generatePostDrafts.js` + `.github/workflows/generate-post-drafts.yml`)も含まれています。**API課金なしで動く事前生成キュー方式**です。
 
-- 毎朝04:45 JST(06:00のLINE送信より前)にGitHub Actionsが起動し、Claude APIで「FIRE・資産形成」「お金×日常生活」「人生・幸福・価値観」「仕事・人間関係・自己投資」の4テーマを曜日ごとの比率(週次で概ね30% / 25% / 25% / 20%)でローテーションしながら3投稿分を生成します
-- 生成ロジック・トーン・コンプライアンスの扱いは `src/generatePostDrafts.js` 内の `SYSTEM_PROMPT` にすべて記述されています。文面や比率を変えたい場合はここを編集してください
-- 直近14日分の投稿案は `post_drafts_history.yaml` に自動保存され、同じ構文・フックの使い回しを避けるための参照データとして次回生成時に使われます
-- このワークフローの実行には `ANTHROPIC_API_KEY` シークレットが必須です(上記「6. Claude APIキーを取得」で発行したものと共用できます)
-- ローカルで試す場合: `ANTHROPIC_API_KEY=sk-... npm run generate:posts`(`post_drafts.yaml` がその場で書き換わります。LINEには送信されません)
+- `post_drafts_queue.yaml` に、日付ごとの投稿案をあらかじめまとめて保存しておきます(Claude Codeとの対話で作成)
+- 毎朝04:45 JST(06:00のLINE送信より前)にGitHub Actionsが起動し、`post_drafts_queue.yaml` から「今日の日付」に一致するentryを `post_drafts.yaml` にコピーするだけ。外部APIは一切呼び出さないので追加コストはゼロです
+- 曜日ごとのテーマ配分(週次で概ね FIRE・資産形成30% / お金×日常生活25% / 人生・幸福・価値観25% / 仕事・人間関係・自己投資20%)やトーン・コンプライアンスのルールは `POST_DRAFT_GUIDELINES.md` にまとめてあります
+- キューの残りが7日分を切ると、ワークフローのログに警告が出ます。減ってきたら `POST_DRAFT_GUIDELINES.md` の内容とあわせてClaude Codeに「次の30日分を追記して」と依頼してください
+- ローカルで試す場合: `npm run generate:posts`(`post_drafts.yaml` がその場で書き換わります。LINEには送信されません)
 - Actionsタブから「Generate Daily Post Drafts」ワークフローを `workflow_dispatch` で手動実行することもできます
 
 ### 9. 動作確認
