@@ -1,0 +1,40 @@
+name: Generate Daily Post Drafts
+
+on:
+  schedule:
+    # 19:45 UTC = 04:45 JST every day (well before the 06:00 JST LINE send job,
+    # with buffer before the 05:30 JST deadline documented in post_drafts.yaml)
+    - cron: "45 19 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm install
+
+      - run: npm run generate:posts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+
+      - name: Commit and push post_drafts.yaml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add post_drafts.yaml post_drafts_history.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: generate post drafts for $(TZ=Asia/Tokyo date +%Y-%m-%d)"
+            git push
+          fi
