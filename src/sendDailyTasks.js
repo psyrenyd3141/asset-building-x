@@ -40,24 +40,42 @@ function loadTodaysTasks(jst) {
     .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1));
 }
 
-function buildPlainMessage(tasks, jst) {
-  const header = `おはようございます☀️\n本日 ${jst.month}/${jst.day}(${WEEKDAY_JA[jst.weekday]}) のタスクです。`;
+function loadTodaysPostDrafts(jst) {
+  const draftsPath = process.env.POST_DRAFTS_FILE || path.join(process.cwd(), "post_drafts.yaml");
+  if (!fs.existsSync(draftsPath)) return [];
 
-  if (tasks.length === 0) {
-    return `${header}\n\n本日予定されているタスクはありません。良い一日を!`;
-  }
+  const doc = yaml.load(fs.readFileSync(draftsPath, "utf8")) ?? {};
+  if (doc.generated_date !== jst.dateStr) return [];
 
-  const lines = tasks.map((t, i) => `${i + 1}. ${t.priority === "high" ? "🔴 " : ""}${t.title}`);
-  return `${header}\n\n${lines.join("\n")}\n\n今日も一日頑張りましょう!`;
+  const posts = Array.isArray(doc.posts) ? doc.posts : [];
+  return posts.filter((p) => typeof p === "string" && p.trim().length > 0);
 }
 
-async function buildAiMessage(tasks, jst) {
+function buildPlainMessage(tasks, jst, postDrafts) {
+  const header = `おはようございます☀️\n本日 ${jst.month}/${jst.day}(${WEEKDAY_JA[jst.weekday]}) のタスクです。`;
+
+  const taskSection =
+    tasks.length === 0
+      ? "本日予定されているタスクはありません。"
+      : tasks.map((t, i) => `${i + 1}. ${t.priority === "high" ? "🔴 " : ""}${t.title}`).join("\n");
+
+  const draftSection =
+    postDrafts.length > 0
+      ? `\n\n📝 今日の投稿案\n${postDrafts.map((p, i) => `${i + 1}. ${p}`).join("\n\n")}`
+      : "";
+
+  return `${header}\n\n${taskSection}${draftSection}\n\n今日も一日頑張りましょう!`;
+}
+
+async function buildAiMessage(tasks, jst, postDrafts) {
   const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
   const system = [
     "あなたはユーザー専属の優秀でフレンドリーなAI秘書です。",
     "LINEで毎朝送る短いメッセージを作成します。",
     "渡された今日のタスクリストの内容は変えず、すべて含めてください（タスクが0件なら「今日は予定タスクなし」と伝えてください）。",
-    "朝の挨拶、今日の日付と曜日、タスクの要点整理、前向きな一言を含め、絵文字は適度に使い、300文字以内・日本語で書いてください。",
+    "postDraftsが渡された場合は、SNS投稿案としてタスクとは別のセクションに分け、文面を一切変更せずそのまま全文含めてください。",
+    "朝の挨拶、今日の日付と曜日、タスクの要点整理、前向きな一言を含め、絵文字は適度に使い、日本語で書いてください。",
+    "postDraftsがある場合は文字数上限を気にせず全文を含めてください。ない場合は300文字以内にまとめてください。",
     "余計な前置きや説明文は付けず、LINEにそのまま送れる本文のみを出力してください。",
   ].join("\n");
 
@@ -65,6 +83,7 @@ async function buildAiMessage(tasks, jst) {
     date: jst.dateStr,
     weekday: WEEKDAY_JA[jst.weekday],
     tasks: tasks.map((t) => ({ title: t.title, priority: t.priority || "normal" })),
+    postDrafts,
   });
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -118,17 +137,18 @@ async function sendLineMessage(text) {
 async function main() {
   const jst = getJstParts();
   const todaysTasks = loadTodaysTasks(jst);
+  const todaysPostDrafts = loadTodaysPostDrafts(jst);
 
   let message;
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      message = await buildAiMessage(todaysTasks, jst);
+      message = await buildAiMessage(todaysTasks, jst, todaysPostDrafts);
     } catch (err) {
       console.warn(`AI message generation failed, falling back to plain message: ${err.message}`);
-      message = buildPlainMessage(todaysTasks, jst);
+      message = buildPlainMessage(todaysTasks, jst, todaysPostDrafts);
     }
   } else {
-    message = buildPlainMessage(todaysTasks, jst);
+    message = buildPlainMessage(todaysTasks, jst, todaysPostDrafts);
   }
 
   console.log("--- Message to send ---");
