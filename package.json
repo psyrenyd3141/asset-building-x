@@ -15,7 +15,8 @@
     "suno:import-cookies": "node src/importSunoCookies.js",
     "suno:login": "node src/sunoLogin.js",
     "suno:record": "node src/sunoRecord.js",
-    "suno:download": "node src/sunoDownload.js"
+    "suno:download": "node src/sunoDownload.js",
+    "bakuage:master": "node src/bakuageMaster.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
