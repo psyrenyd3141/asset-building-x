@@ -19,7 +19,14 @@ function waitForEnter(promptText) {
 async function main() {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
 
-  const browser = await chromium.launch({ headless: false });
+  // Googleは自動操作用のブラウザ(テスト用Chromium)からのログインをブロックすることがあるため、
+  // PCにインストール済みの本物のChromeを使い、自動操作の痕跡を隠すオプションを付ける。
+  const browser = await chromium.launch({
+    headless: false,
+    channel: "chrome",
+    args: ["--disable-blink-features=AutomationControlled"],
+    ignoreDefaultArgs: ["--enable-automation"],
+  });
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("https://suno.com");
