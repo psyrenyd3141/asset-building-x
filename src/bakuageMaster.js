@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 const RAW_DIR = path.join(process.cwd(), "downloads", "raw");
 const MASTERED_DIR = path.join(process.cwd(), "downloads", "mastered");
 const BAKUAGE_URL = "https://app.bakuage.com/#/masterings";
-const PROCESSING_TIMEOUT_MS = 5 * 60 * 1000;
+const PROCESSING_TIMEOUT_MS = 60 * 60 * 1000;
 const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : Infinity;
 
 function getPendingFiles() {
