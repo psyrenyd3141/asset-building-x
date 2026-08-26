@@ -1,9 +1,7 @@
-import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
 
-const AUTH_DIR = path.join(process.cwd(), ".auth");
-const STORAGE_STATE_PATH = path.join(AUTH_DIR, "suno-storage-state.json");
+const PROFILE_DIR = path.join(process.cwd(), ".auth", "chrome-profile");
 
 function waitForEnter(promptText) {
   return new Promise((resolve) => {
@@ -17,28 +15,26 @@ function waitForEnter(promptText) {
 }
 
 async function main() {
-  fs.mkdirSync(AUTH_DIR, { recursive: true });
-
-  // Googleは自動操作用のブラウザ(テスト用Chromium)からのログインをブロックすることがあるため、
-  // PCにインストール済みの本物のChromeを使い、自動操作の痕跡を隠すオプションを付ける。
-  const browser = await chromium.launch({
+  // .auth/chrome-profile には、普段使っているChromeのプロフィール(ログイン状態込み)を
+  // 事前にコピーしておく。本物のChromeプロフィールを使って開くので、
+  // Googleの「自動操作ブラウザ」検知には引っかからず、すでにログイン済みの状態で開ける。
+  const context = await chromium.launchPersistentContext(PROFILE_DIR, {
     headless: false,
     channel: "chrome",
     args: ["--disable-blink-features=AutomationControlled"],
     ignoreDefaultArgs: ["--enable-automation"],
   });
-  const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("https://suno.com");
 
   await waitForEnter(
-    "ブラウザでSUNOにログインしてください。ログインできたらこのターミナルに戻って Enter キーを押してください...\n"
+    "SUNOにログイン済みの状態で表示されているか確認してください。\n" +
+      "(もしログインが必要な画面なら、ここで手動でログインしてください)\n" +
+      "確認できたらこのターミナルに戻って Enter キーを押してください...\n"
   );
 
-  await context.storageState({ path: STORAGE_STATE_PATH });
-  console.log(`ログインセッションを保存しました: ${STORAGE_STATE_PATH}`);
-
-  await browser.close();
+  await context.close();
+  console.log("完了しました。このプロフィールは今後の自動化スクリプトでもそのまま使えます。");
 }
 
 main().catch((err) => {
