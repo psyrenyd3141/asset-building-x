@@ -14,7 +14,8 @@
     "generate:posts": "node src/generatePostDrafts.js",
     "suno:import-cookies": "node src/importSunoCookies.js",
     "suno:login": "node src/sunoLogin.js",
-    "suno:record": "node src/sunoRecord.js"
+    "suno:record": "node src/sunoRecord.js",
+    "suno:download": "node src/sunoDownload.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
