@@ -23,6 +23,9 @@ async function main() {
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
+  // ボタンのクリックや表示待ちなど、このページ上の全ての待機処理にこの時間を適用する
+  // (個別の操作ごとに毎回タイムアウトが違ってエラーになるのを防ぐため)
+  page.setDefaultTimeout(PROCESSING_TIMEOUT_MS);
 
   let processedCount = 0;
   for (const fileName of pending) {
