@@ -23,18 +23,19 @@ async function main() {
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto(BAKUAGE_URL);
-
-  const agreeButton = page.getByRole("button", { name: "同意する" });
-  if (await agreeButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await agreeButton.click();
-  }
 
   let processedCount = 0;
   for (const fileName of pending) {
     if (processedCount >= LIMIT) break;
     const filePath = path.join(RAW_DIR, fileName);
     console.log(`処理中: ${fileName}`);
+
+    // 前の曲の状態(モーダルの残留など)を引きずらないよう、毎回ページを開き直す
+    await page.goto(BAKUAGE_URL);
+    const agreeButton = page.getByRole("button", { name: "同意する" });
+    if (await agreeButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await agreeButton.click();
+    }
 
     await page.getByRole("listitem").filter({ hasText: "新規マスタリング" }).click();
     await page.locator(".el-upload-dragger").click();
@@ -44,7 +45,7 @@ async function main() {
     const downloadButton = page.getByRole("button", { name: " マスタリング後ダウンロード (フル)" });
     await downloadButton.waitFor({ state: "visible", timeout: PROCESSING_TIMEOUT_MS });
 
-    const downloadPromise = page.waitForEvent("download");
+    const downloadPromise = page.waitForEvent("download", { timeout: PROCESSING_TIMEOUT_MS });
     await downloadButton.click();
     const download = await downloadPromise;
 
