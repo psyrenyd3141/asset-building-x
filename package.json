@@ -11,9 +11,11 @@
     "send": "node src/sendDailyTasks.js",
     "send:dry-run": "DRY_RUN=1 node src/sendDailyTasks.js",
     "get-user-id": "node src/getUserId.js",
-    "generate:posts": "node src/generatePostDrafts.js"
+    "generate:posts": "node src/generatePostDrafts.js",
+    "suno:login": "node src/sunoLogin.js"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "playwright": "^1.48.0"
   }
 }
