@@ -13,7 +13,8 @@
     "get-user-id": "node src/getUserId.js",
     "generate:posts": "node src/generatePostDrafts.js",
     "suno:import-cookies": "node src/importSunoCookies.js",
-    "suno:login": "node src/sunoLogin.js"
+    "suno:login": "node src/sunoLogin.js",
+    "suno:record": "node src/sunoRecord.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
