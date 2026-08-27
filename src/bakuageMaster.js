@@ -32,6 +32,12 @@ async function masterOneSong(page, filePath) {
     await agreeButton.click();
   }
 
+  // 前回の処理で残った確認ダイアログなどが操作をブロックすることがあるため、念のため閉じておく
+  if (await page.getByRole("dialog").first().isVisible({ timeout: 2000 }).catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+  }
+
   await page.getByRole("listitem").filter({ hasText: "新規マスタリング" }).click();
   await page.locator(".el-upload-dragger").click();
   await page.locator('input[name="file"]').setInputFiles(filePath);
