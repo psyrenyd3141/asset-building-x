@@ -7,7 +7,7 @@ const MASTERED_DIR = path.join(process.cwd(), "downloads", "mastered");
 const FAILED_LOG_PATH = path.join(process.cwd(), "downloads", "failed_songs.json");
 const BAKUAGE_URL = "https://app.bakuage.com/#/masterings";
 const UI_ACTION_TIMEOUT_MS = 3 * 60 * 1000;
-const MASTERING_WAIT_TIMEOUT_MS = 15 * 60 * 1000;
+const MASTERING_WAIT_TIMEOUT_MS = 30 * 60 * 1000;
 const LIMIT = process.env.LIMIT ? Number(process.env.LIMIT) : Infinity;
 
 function getPendingFiles() {
