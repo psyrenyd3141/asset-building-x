@@ -112,6 +112,26 @@ async function buildAiMessage(tasks, jst, postDrafts) {
   return text;
 }
 
+async function alreadySentToday(jst) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY;
+  const currentRunId = process.env.GITHUB_RUN_ID;
+  if (!token || !repo) return false; // ローカル実行など、判定できない場合は素通りする
+
+  const res = await fetch(
+    `https://api.github.com/repos/${repo}/actions/workflows/daily-secretary.yml/runs?status=success&per_page=20`,
+    { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" } },
+  );
+  if (!res.ok) return false; // API障害時はブロックせず送信を優先する
+
+  const data = await res.json();
+  const runs = Array.isArray(data.workflow_runs) ? data.workflow_runs : [];
+  return runs.some((run) => {
+    if (String(run.id) === String(currentRunId)) return false;
+    return getJstParts(new Date(run.created_at)).dateStr === jst.dateStr;
+  });
+}
+
 async function sendLineMessage(text) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   const to = process.env.LINE_USER_ID;
@@ -136,6 +156,12 @@ async function sendLineMessage(text) {
 
 async function main() {
   const jst = getJstParts();
+
+  if (await alreadySentToday(jst)) {
+    console.log(`Already sent successfully today (${jst.dateStr}); skipping to avoid a duplicate LINE message.`);
+    return;
+  }
+
   const todaysTasks = loadTodaysTasks(jst);
   const todaysPostDrafts = loadTodaysPostDrafts(jst);
 
