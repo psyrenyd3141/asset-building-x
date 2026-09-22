@@ -1,3 +1,8 @@
+// FIRECRAWL_API_KEYは省略可: Claude Code Cloud環境の「API credentials」で
+// api.firecrawl.devへのBearerトークンを設定している場合、そちらをエージェント
+// プロキシが自動付与するため、このスクリプト自身はキーを扱わない(値を知らない)。
+// ローカル実行やGitHub Actionsなど、API credentialsの仕組みがない環境で動かす
+// 場合だけ、.envにFIRECRAWL_API_KEYを設定してください。
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 
 async function main() {
@@ -6,23 +11,24 @@ async function main() {
     console.error('Usage: node src/scrapeArticle.js <URL>');
     process.exit(1);
   }
-  if (!FIRECRAWL_API_KEY) {
-    console.error('FIRECRAWL_API_KEY が設定されていません(.env を確認してください)');
-    process.exit(1);
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (FIRECRAWL_API_KEY) {
+    headers.Authorization = `Bearer ${FIRECRAWL_API_KEY}`;
   }
 
   const res = await fetch('https://api.firecrawl.dev/v2/scrape', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-    },
+    headers,
     body: JSON.stringify({ url, formats: ['markdown'] }),
   });
 
   if (!res.ok) {
     const text = await res.text();
     console.error(`Firecrawl APIエラー: ${res.status} ${text}`);
+    if (res.status === 401 || res.status === 403) {
+      console.error('FIRECRAWL_API_KEYが未設定の場合、Cloud環境のAPI credentialsにapi.firecrawl.devへのBearerトークンを設定してください。');
+    }
     process.exit(1);
   }
 
