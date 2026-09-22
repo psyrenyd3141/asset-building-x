@@ -139,6 +139,25 @@ npm run send:dry-run   # LINEには送らず、コンソールにメッセージ
 npm run send           # 実際にLINEへ送信
 ```
 
+### 10. (任意) X記事(キジ)の参考記事データベースを使う
+
+X記事(長文記事)を書く際に、他アカウントの伸びている記事を参考として蓄積していく仕組みです。ユーザーが「良い」と思ったURLをClaude Codeに渡すと、Firecrawlで本文を取得 → Claude Codeが需要(テーマ・ターゲット・悩み・切り口)を分析 → Googleスプレッドシートに1行追記、という流れで動きます。ノウハウの詳細は `.claude/skills/x-article/` を参照してください。
+
+1. [firecrawl.dev](https://www.firecrawl.dev/) でアカウント登録し、APIキーを発行 → `FIRECRAWL_API_KEY`
+2. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクトを作成し、「Google Sheets API」を有効化
+3. 「APIとサービス」→「認証情報」→「サービスアカウントを作成」。作成後、キーを追加(JSON形式)してダウンロード
+4. ダウンロードしたJSONの `client_email` を `GOOGLE_SERVICE_ACCOUNT_EMAIL`、`private_key` の値をそのまま(改行は`\n`のまま、1行で) `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` に設定
+5. 記事データベース用のGoogleスプレッドシートを新規作成し、共有設定で3の `client_email` を「編集者」として追加
+6. スプレッドシートのURL(`https://docs.google.com/spreadsheets/d/<ここ>/edit`)の該当部分を `GOOGLE_SHEET_ID` に設定
+7. `npm run setup-article-sheet` を実行(「記事データベース」という名前のシートとヘッダー行が作成されます)
+8. 動作確認:
+   ```bash
+   npm run scrape-article -- "https://x.com/..." # 本文取得を確認(JSONが出力されます)
+   npm run add-article -- '{"url":"https://x.com/...","author":"@example","title":"...","postedAt":"2026-09-22","impressions":"1000000","bookmarks":"1000","genre":"AI系","demandMemo":"テーマ:.../ターゲット:.../悩み:.../切り口:..."}'
+   ```
+
+Firecrawlは動的にレンダリングされたページの取得を試みますが、Xはログインなしだと表示が制限される場合があります。うまく本文が取得できない場合は、記事の内容をコピー&ペーストでClaude Codeに渡して分析してもらう方法にフォールバックしてください。
+
 ## スケジュールの変更
 
 `.github/workflows/daily-secretary.yml` の `cron` を編集してください。デフォルトは `0 21 * * *`(UTC)= 毎朝06:00 JSTです。cronはUTC基準で評価されるため、JSTの時刻から9時間引いた値を指定してください。
