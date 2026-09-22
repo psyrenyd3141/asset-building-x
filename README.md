@@ -10,7 +10,7 @@
 4. `ANTHROPIC_API_KEY` を設定していれば、Claude APIで挨拶+タスク整理+一言のメッセージを生成。未設定なら定型フォーマットで送信
 5. LINE Messaging APIの `push` エンドポイントでLINEにメッセージを送信
 
-X投稿案(`post_drafts.yaml`)の中身の作り方・運用ノウハウは以下のドキュメントにまとめてあります。新しいセッションでこのリポジトリを開いた場合も、これらを読めば同じルールで作業を再開できます。
+X投稿案(`post_drafts.yaml`)の中身の作り方・運用ノウハウは以下のドキュメントにまとめてあります。新しいセッションでこのリポジトリを開いた場合も、これらを読めば同じルールで作業を再開できます。Claude Codeで作業する場合は `.claude/skills/x-post/` にSkillとして登録済みなので、「投稿案を作って」「post_drafts_queue.yamlを補充して」のように依頼するだけで自動的にこれらのファイルが参照されます。
 
 - [`ACCOUNT_GUIDELINES.md`](./ACCOUNT_GUIDELINES.md) — Xアカウントの立ち位置・トーン・コンプライアンスの扱い方
 - [`DEMAND_EXTRACTION_METHOD.md`](./DEMAND_EXTRACTION_METHOD.md) — 他アカウントの投稿から「需要」だけを抽出してオリジナル投稿を作る手順
