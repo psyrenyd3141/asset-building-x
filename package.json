@@ -12,7 +12,7 @@
     "send:dry-run": "DRY_RUN=1 node src/sendDailyTasks.js",
     "get-user-id": "node src/getUserId.js",
     "generate:posts": "node src/generatePostDrafts.js",
-    "scrape-article": "node src/scrapeArticle.js",
+    "scrape-article": "NODE_USE_ENV_PROXY=1 node src/scrapeArticle.js",
     "setup-article-sheet": "node src/setupArticleSheet.js",
     "add-article": "node src/appendArticleRow.js"
   },

@@ -3,6 +3,12 @@
 // プロキシが自動付与するため、このスクリプト自身はキーを扱わない(値を知らない)。
 // ローカル実行やGitHub Actionsなど、API credentialsの仕組みがない環境で動かす
 // 場合だけ、.envにFIRECRAWL_API_KEYを設定してください。
+//
+// Claude Code Cloud環境ではNode.js組み込みのfetch()がHTTPS_PROXY環境変数を
+// 自動では読まないため、`npm run scrape-article`はNODE_USE_ENV_PROXY=1を
+// 付けて実行している(Node 22.21以降で有効なフラグ)。このファイルを直接
+// `node src/scrapeArticle.js`で動かす場合は同様にNODE_USE_ENV_PROXY=1を
+// 付けること。
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 
 async function main() {
