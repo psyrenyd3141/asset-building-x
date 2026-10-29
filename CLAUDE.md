@@ -18,6 +18,13 @@
 
 以下は各セッションの記録です。日付が新しいものほど上に追記していく想定です。
 
+### ✅ LINE投稿案の補充 (branch: `claude/line-ai-secretary-daily-tasks-jg8scp`, 2026-10-30)
+- 「毎日の投稿案がLINEに届かなくなった」という相談。原因は `post_drafts_queue.yaml` のストックが2026-09-24で尽きていたこと(送信の仕組み自体は正常で、9/25以降はタスクのみ送信されていた)
+- `POST_DRAFT_GUIDELINES.md` の曜日別テーマ配分に沿って、2026-10-31〜11-29の30日分(90本)を追加。11月の季節ネタ(NISA年間枠・iDeCo年末調整・ブラックフライデー等)を含め、PBR LENDINGのPRは11/11の1回のみ
+- YAMLの検証と、10/31を想定した `DRY_RUN` での送信テストで、投稿案がLINEメッセージに含まれることを確認済み。commit `7449271` でpush
+- 未解決: 実際のLINE着信は10/31朝6:00の配信で要確認。キューは11/29で尽きるので、11月下旬に次の30日分を補充すること
+- メモ: このPCにはgitのuser.name/emailが未設定のため、commit時は `-c user.name=Claude -c user.email=noreply@anthropic.com` を付けている
+
 ### ✅ Claudeで作ったMdファイルの読み込み (branch: `claude/claude-md-file-reading-36ye8w`, 2026-08-24)
 - 「ClaudeでMdファイルは読み込めるか」という質問から始まり、別セッション(部屋)の記憶をどう引き継ぐかという話に発展
 - 他4セッションのメタデータを取得し、その要約をこのCLAUDE.mdに記録(下記の各エントリ)
